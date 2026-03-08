@@ -1,10 +1,13 @@
+import { useState } from 'react';
 import { useResumeStore } from '@/store/resumeStore';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, User, Briefcase, GraduationCap, Lightbulb, FileText } from 'lucide-react';
-import { Separator } from '@/components/ui/separator';
+import { Plus, Trash2, User, Briefcase, GraduationCap, Lightbulb, FileText, Sparkles, Loader2, BarChart3 } from 'lucide-react';
+import { toast } from 'sonner';
+import { improveBullet, generateSummary, suggestSkills } from '@/lib/ai';
+import ATSPanel from './ATSPanel';
 
 const sectionNav = [
   { id: 'personal', icon: User, label: 'Personal' },
@@ -12,11 +15,63 @@ const sectionNav = [
   { id: 'experience', icon: Briefcase, label: 'Experience' },
   { id: 'education', icon: GraduationCap, label: 'Education' },
   { id: 'skills', icon: Lightbulb, label: 'Skills' },
+  { id: 'ats', icon: BarChart3, label: 'ATS Score' },
 ];
 
 const EditorPanel = () => {
   const store = useResumeStore();
   const { data, activeSection } = store;
+  const [loadingBullet, setLoadingBullet] = useState<string | null>(null);
+  const [loadingSummary, setLoadingSummary] = useState(false);
+  const [loadingSkills, setLoadingSkills] = useState(false);
+
+  const handleImproveBullet = async (expId: string, bulletIndex: number, bullet: string) => {
+    const exp = data.experience.find(e => e.id === expId);
+    if (!bullet.trim()) { toast.error('Write something first'); return; }
+    const key = `${expId}-${bulletIndex}`;
+    setLoadingBullet(key);
+    try {
+      const improved = await improveBullet(bullet, exp?.jobTitle || '', exp?.company || '');
+      store.updateBullet(expId, bulletIndex, improved);
+      toast.success('Bullet point improved!');
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to improve bullet');
+    } finally {
+      setLoadingBullet(null);
+    }
+  };
+
+  const handleGenerateSummary = async () => {
+    setLoadingSummary(true);
+    try {
+      const summary = await generateSummary(data);
+      store.setSummary(summary);
+      toast.success('Summary generated!');
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to generate summary');
+    } finally {
+      setLoadingSummary(false);
+    }
+  };
+
+  const handleSuggestSkills = async () => {
+    setLoadingSkills(true);
+    try {
+      const skills = await suggestSkills(data);
+      const generateId = () => Math.random().toString(36).substr(2, 9);
+      skills.forEach(skill => {
+        store.addSkill();
+        const currentSkills = useResumeStore.getState().data.skills;
+        const lastSkill = currentSkills[currentSkills.length - 1];
+        store.updateSkill(lastSkill.id, { name: skill.name, level: skill.level, category: skill.category });
+      });
+      toast.success(`${skills.length} skills suggested!`);
+    } catch (e: any) {
+      toast.error(e.message || 'Failed to suggest skills');
+    } finally {
+      setLoadingSkills(false);
+    }
+  };
 
   return (
     <div className="h-full flex flex-col bg-card">
@@ -78,7 +133,19 @@ const EditorPanel = () => {
 
         {activeSection === 'summary' && (
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold text-foreground font-sans">Professional Summary</h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-semibold text-foreground font-sans">Professional Summary</h3>
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={handleGenerateSummary}
+                disabled={loadingSummary}
+                className="text-primary border-primary/30 hover:bg-primary/5"
+              >
+                {loadingSummary ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                AI Write
+              </Button>
+            </div>
             <Textarea
               placeholder="A brief summary of your professional background and career goals..."
               className="min-h-[150px]"
@@ -128,18 +195,33 @@ const EditorPanel = () => {
                 </div>
                 <div className="space-y-2">
                   <Label>Bullet Points</Label>
-                  {exp.bullets.map((bullet, i) => (
-                    <div key={i} className="flex gap-2">
-                      <Input
-                        placeholder="Describe your achievement..."
-                        value={bullet}
-                        onChange={(e) => store.updateBullet(exp.id, i, e.target.value)}
-                      />
-                      <Button size="icon" variant="ghost" className="text-destructive h-9 w-9 shrink-0" onClick={() => store.removeBullet(exp.id, i)}>
-                        <Trash2 className="w-3 h-3" />
-                      </Button>
-                    </div>
-                  ))}
+                  {exp.bullets.map((bullet, i) => {
+                    const bulletKey = `${exp.id}-${i}`;
+                    return (
+                      <div key={i} className="space-y-1">
+                        <div className="flex gap-2">
+                          <Input
+                            placeholder="Describe your achievement..."
+                            value={bullet}
+                            onChange={(e) => store.updateBullet(exp.id, i, e.target.value)}
+                          />
+                          <Button
+                            size="icon"
+                            variant="ghost"
+                            className="h-9 w-9 shrink-0 text-primary hover:bg-primary/5"
+                            onClick={() => handleImproveBullet(exp.id, i, bullet)}
+                            disabled={loadingBullet === bulletKey}
+                            title="Improve with AI"
+                          >
+                            {loadingBullet === bulletKey ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                          </Button>
+                          <Button size="icon" variant="ghost" className="text-destructive h-9 w-9 shrink-0" onClick={() => store.removeBullet(exp.id, i)}>
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                      </div>
+                    );
+                  })}
                   <Button size="sm" variant="ghost" onClick={() => store.addBullet(exp.id)}>
                     <Plus className="w-3 h-3 mr-1" /> Add Bullet
                   </Button>
@@ -195,12 +277,24 @@ const EditorPanel = () => {
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-foreground font-sans">Skills</h3>
-              <Button size="sm" variant="outline" onClick={() => store.addSkill()}>
-                <Plus className="w-4 h-4 mr-1" /> Add
-              </Button>
+              <div className="flex gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={handleSuggestSkills}
+                  disabled={loadingSkills}
+                  className="text-primary border-primary/30 hover:bg-primary/5"
+                >
+                  {loadingSkills ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
+                  AI Suggest
+                </Button>
+                <Button size="sm" variant="outline" onClick={() => store.addSkill()}>
+                  <Plus className="w-4 h-4 mr-1" /> Add
+                </Button>
+              </div>
             </div>
             {data.skills.length === 0 && (
-              <p className="text-sm text-muted-foreground py-8 text-center">No skills added yet.</p>
+              <p className="text-sm text-muted-foreground py-8 text-center">No skills added yet. Try "AI Suggest" to get started.</p>
             )}
             <div className="space-y-2">
               {data.skills.map((skill) => (
@@ -228,6 +322,8 @@ const EditorPanel = () => {
             </div>
           </div>
         )}
+
+        {activeSection === 'ats' && <ATSPanel />}
       </div>
     </div>
   );
