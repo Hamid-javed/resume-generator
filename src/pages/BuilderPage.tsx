@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FileText, ArrowLeft, Download, Save, Check } from 'lucide-react';
+import { FileText, ArrowLeft, Download, Save, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EditorPanel from '@/components/builder/EditorPanel';
 import PreviewPanel from '@/components/builder/PreviewPanel';
@@ -9,6 +9,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Json } from '@/integrations/supabase/types';
+import { exportResumePdf } from '@/lib/exportPdf';
 
 const BuilderPage = () => {
   const navigate = useNavigate();
