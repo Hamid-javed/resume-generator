@@ -1,5 +1,6 @@
 import { ResumeData, ResumeStyles, defaultStyles } from '@/store/resumeStore';
 import { Mail, Phone, MapPin, Linkedin, Github, Globe } from 'lucide-react';
+import { sampleResumeData } from '@/lib/sampleResumeData';
 
 interface TemplateProps {
   data: ResumeData;
