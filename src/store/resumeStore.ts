@@ -185,6 +185,7 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
         experience: content.experience || [],
         education: content.education || [],
         skills: content.skills || [],
+        styles: content.styles ? { ...defaultStyles, ...content.styles } : defaultStyles,
       },
     });
   },
