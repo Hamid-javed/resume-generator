@@ -274,11 +274,7 @@ export const DeveloperTemplate = ({ data }: TemplateProps) => {
   const hasContent = personalInfo.fullName || summary || experience.length || education.length || skills.length;
 
   if (!hasContent) {
-    return (
-      <div className="flex items-center justify-center h-full text-muted-foreground">
-        <p className="text-sm">Start filling in your details to see the preview</p>
-      </div>
-    );
+    return <DeveloperTemplate data={sampleResumeData} />;
   }
 
   const terminalBg = s.backgroundColor === '#ffffff' ? '#0F172A' : s.backgroundColor;
