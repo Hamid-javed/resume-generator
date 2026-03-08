@@ -16,6 +16,7 @@ const BuilderPage = () => {
   const { resumeId } = useParams();
   const { user, loading: authLoading } = useAuth();
   const { loadResume, saveResume, resetStore, resumeTitle, saving, data, templateId } = useResumeStore();
+  const [exporting, setExporting] = useState(false);
   const autoSaveRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Redirect if not logged in
