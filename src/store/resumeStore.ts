@@ -100,7 +100,7 @@ export interface ResumeData {
   styles: ResumeStyles;
 }
 
-export type TemplateId = 'minimal' | 'executive' | 'bold' | 'developer';
+export type TemplateId = 'minimal' | 'executive' | 'bold' | 'developer' | 'corporate' | 'ats-classic' | 'creative' | 'two-column';
 
 interface ResumeState {
   resumeId: string | null;
