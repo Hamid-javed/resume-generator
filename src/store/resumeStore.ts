@@ -188,6 +188,15 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
   removeSkill: (id) =>
     set((s) => ({ data: { ...s.data, skills: s.data.skills.filter((sk) => sk.id !== id) } })),
 
+  reorderExperience: (oldIndex, newIndex) =>
+    set((s) => ({ data: { ...s.data, experience: arrayMove(s.data.experience, oldIndex, newIndex) } })),
+  reorderEducation: (oldIndex, newIndex) =>
+    set((s) => ({ data: { ...s.data, education: arrayMove(s.data.education, oldIndex, newIndex) } })),
+  reorderSkills: (oldIndex, newIndex) =>
+    set((s) => ({ data: { ...s.data, skills: arrayMove(s.data.skills, oldIndex, newIndex) } })),
+  reorderBullets: (expId, oldIndex, newIndex) =>
+    set((s) => ({ data: { ...s.data, experience: s.data.experience.map((e) => e.id === expId ? { ...e, bullets: arrayMove(e.bullets, oldIndex, newIndex) } : e) } })),
+
   setTemplateId: (templateId) => set({ templateId }),
   setActiveSection: (activeSection) => set({ activeSection }),
   setResumeTitle: (resumeTitle) => set({ resumeTitle }),
