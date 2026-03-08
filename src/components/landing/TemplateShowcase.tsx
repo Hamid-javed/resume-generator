@@ -1,6 +1,10 @@
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
 import { MinimalTemplate, ExecutiveTemplate, BoldTemplate, DeveloperTemplate } from '@/components/builder/ResumeTemplates';
+import { CorporateTemplate } from '@/components/builder/templates/CorporateTemplate';
+import { ATSClassicTemplate } from '@/components/builder/templates/ATSClassicTemplate';
+import { CreativeTemplate } from '@/components/builder/templates/CreativeTemplate';
+import { TwoColumnTemplate } from '@/components/builder/templates/TwoColumnTemplate';
 import { sampleResumeData } from '@/lib/sampleResumeData';
 import { defaultStyles, TemplateId } from '@/store/resumeStore';
 
@@ -16,6 +20,10 @@ const templateComponents: Record<TemplateId, React.FC<any>> = {
   executive: ExecutiveTemplate,
   bold: BoldTemplate,
   developer: DeveloperTemplate,
+  corporate: CorporateTemplate,
+  'ats-classic': ATSClassicTemplate,
+  creative: CreativeTemplate,
+  'two-column': TwoColumnTemplate,
 };
 
 const templateStyles: Record<TemplateId, typeof defaultStyles> = {
@@ -23,6 +31,10 @@ const templateStyles: Record<TemplateId, typeof defaultStyles> = {
   executive: { ...defaultStyles, accentColor: '#1E293B', headerBgColor: '#1E293B' },
   bold: { ...defaultStyles, accentColor: '#7C3AED' },
   developer: { ...defaultStyles, accentColor: '#10B981' },
+  corporate: { ...defaultStyles, accentColor: '#0F4C81' },
+  'ats-classic': { ...defaultStyles, accentColor: '#111827' },
+  creative: { ...defaultStyles, accentColor: '#E11D48' },
+  'two-column': { ...defaultStyles, accentColor: '#2563EB' },
 };
 
 const TemplateShowcase = () => {

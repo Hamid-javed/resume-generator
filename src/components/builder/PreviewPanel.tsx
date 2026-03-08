@@ -1,11 +1,19 @@
 import { useResumeStore, TemplateId } from '@/store/resumeStore';
 import { MinimalTemplate, ExecutiveTemplate, BoldTemplate, DeveloperTemplate } from './ResumeTemplates';
+import { CorporateTemplate } from './templates/CorporateTemplate';
+import { ATSClassicTemplate } from './templates/ATSClassicTemplate';
+import { CreativeTemplate } from './templates/CreativeTemplate';
+import { TwoColumnTemplate } from './templates/TwoColumnTemplate';
 
 const templateMap: Record<TemplateId, React.FC<any>> = {
   minimal: MinimalTemplate,
   executive: ExecutiveTemplate,
   bold: BoldTemplate,
   developer: DeveloperTemplate,
+  corporate: CorporateTemplate,
+  'ats-classic': ATSClassicTemplate,
+  creative: CreativeTemplate,
+  'two-column': TwoColumnTemplate,
 };
 
 const templateNames: Record<TemplateId, string> = {
@@ -13,6 +21,10 @@ const templateNames: Record<TemplateId, string> = {
   executive: 'Executive',
   bold: 'Bold',
   developer: 'Developer',
+  corporate: 'Corporate',
+  'ats-classic': 'ATS Classic',
+  creative: 'Creative',
+  'two-column': 'Two-Column',
 };
 
 const PreviewPanel = () => {
