@@ -32,6 +32,7 @@ const sectionNav = [
   { id: 'experience', icon: Briefcase, label: 'Experience' },
   { id: 'education', icon: GraduationCap, label: 'Education' },
   { id: 'skills', icon: Lightbulb, label: 'Skills' },
+  { id: 'style', icon: Palette, label: 'Style' },
   { id: 'ats', icon: BarChart3, label: 'ATS Score' },
 ];
 
