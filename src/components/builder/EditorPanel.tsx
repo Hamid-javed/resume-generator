@@ -4,10 +4,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
-import { Plus, Trash2, User, Briefcase, GraduationCap, Lightbulb, FileText, Sparkles, Loader2, BarChart3 } from 'lucide-react';
+import { Plus, Trash2, User, Briefcase, GraduationCap, Lightbulb, FileText, Sparkles, Loader2, BarChart3, Palette } from 'lucide-react';
 import { toast } from 'sonner';
 import { improveBullet, generateSummary, suggestSkills } from '@/lib/ai';
 import ATSPanel from './ATSPanel';
+import StylePanel from './StylePanel';
 import SortableItem from './SortableItem';
 import SortableBulletItem from './SortableBulletItem';
 import {
