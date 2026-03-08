@@ -15,8 +15,6 @@ export const MinimalTemplate = ({ data }: TemplateProps) => {
   const hasContent = personalInfo.fullName || summary || experience.length || education.length || skills.length;
 
   if (!hasContent) {
-    // Show with sample data when empty (for previews)
-    const { sampleResumeData } = require('@/lib/sampleResumeData');
     return <MinimalTemplate data={sampleResumeData} />;
   }
 
