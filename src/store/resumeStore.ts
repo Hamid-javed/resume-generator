@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { arrayMove } from '@dnd-kit/sortable';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Json } from '@/integrations/supabase/types';
@@ -72,6 +73,10 @@ interface ResumeState {
   addSkill: () => void;
   updateSkill: (id: string, skill: Partial<Skill>) => void;
   removeSkill: (id: string) => void;
+  reorderExperience: (oldIndex: number, newIndex: number) => void;
+  reorderEducation: (oldIndex: number, newIndex: number) => void;
+  reorderSkills: (oldIndex: number, newIndex: number) => void;
+  reorderBullets: (expId: string, oldIndex: number, newIndex: number) => void;
   setTemplateId: (id: TemplateId) => void;
   setActiveSection: (section: string) => void;
   setResumeTitle: (title: string) => void;
@@ -183,6 +188,15 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
     set((s) => ({ data: { ...s.data, skills: s.data.skills.map((sk) => (sk.id === id ? { ...sk, ...skill } : sk)) } })),
   removeSkill: (id) =>
     set((s) => ({ data: { ...s.data, skills: s.data.skills.filter((sk) => sk.id !== id) } })),
+
+  reorderExperience: (oldIndex, newIndex) =>
+    set((s) => ({ data: { ...s.data, experience: arrayMove(s.data.experience, oldIndex, newIndex) } })),
+  reorderEducation: (oldIndex, newIndex) =>
+    set((s) => ({ data: { ...s.data, education: arrayMove(s.data.education, oldIndex, newIndex) } })),
+  reorderSkills: (oldIndex, newIndex) =>
+    set((s) => ({ data: { ...s.data, skills: arrayMove(s.data.skills, oldIndex, newIndex) } })),
+  reorderBullets: (expId, oldIndex, newIndex) =>
+    set((s) => ({ data: { ...s.data, experience: s.data.experience.map((e) => e.id === expId ? { ...e, bullets: arrayMove(e.bullets, oldIndex, newIndex) } : e) } })),
 
   setTemplateId: (templateId) => set({ templateId }),
   setActiveSection: (activeSection) => set({ activeSection }),

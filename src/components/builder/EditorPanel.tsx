@@ -8,6 +8,22 @@ import { Plus, Trash2, User, Briefcase, GraduationCap, Lightbulb, FileText, Spar
 import { toast } from 'sonner';
 import { improveBullet, generateSummary, suggestSkills } from '@/lib/ai';
 import ATSPanel from './ATSPanel';
+import SortableItem from './SortableItem';
+import SortableBulletItem from './SortableBulletItem';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
 
 const sectionNav = [
   { id: 'personal', icon: User, label: 'Personal' },
@@ -24,6 +40,11 @@ const EditorPanel = () => {
   const [loadingBullet, setLoadingBullet] = useState<string | null>(null);
   const [loadingSummary, setLoadingSummary] = useState(false);
   const [loadingSkills, setLoadingSkills] = useState(false);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
 
   const handleImproveBullet = async (expId: string, bulletIndex: number, bullet: string) => {
     const exp = data.experience.find(e => e.id === expId);
@@ -58,7 +79,6 @@ const EditorPanel = () => {
     setLoadingSkills(true);
     try {
       const skills = await suggestSkills(data);
-      const generateId = () => Math.random().toString(36).substr(2, 9);
       skills.forEach(skill => {
         store.addSkill();
         const currentSkills = useResumeStore.getState().data.skills;
@@ -70,6 +90,44 @@ const EditorPanel = () => {
       toast.error(e.message || 'Failed to suggest skills');
     } finally {
       setLoadingSkills(false);
+    }
+  };
+
+  const handleExperienceDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = data.experience.findIndex(e => e.id === active.id);
+      const newIndex = data.experience.findIndex(e => e.id === over.id);
+      store.reorderExperience(oldIndex, newIndex);
+    }
+  };
+
+  const handleEducationDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = data.education.findIndex(e => e.id === active.id);
+      const newIndex = data.education.findIndex(e => e.id === over.id);
+      store.reorderEducation(oldIndex, newIndex);
+    }
+  };
+
+  const handleSkillsDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = data.skills.findIndex(s => s.id === active.id);
+      const newIndex = data.skills.findIndex(s => s.id === over.id);
+      store.reorderSkills(oldIndex, newIndex);
+    }
+  };
+
+  const handleBulletDragEnd = (expId: string) => (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const exp = data.experience.find(e => e.id === expId);
+      if (!exp) return;
+      const oldIndex = parseInt(String(active.id).split('-bullet-')[1]);
+      const newIndex = parseInt(String(over.id).split('-bullet-')[1]);
+      store.reorderBullets(expId, oldIndex, newIndex);
     }
   };
 
@@ -135,23 +193,12 @@ const EditorPanel = () => {
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-foreground font-sans">Professional Summary</h3>
-              <Button
-                size="sm"
-                variant="outline"
-                onClick={handleGenerateSummary}
-                disabled={loadingSummary}
-                className="text-primary border-primary/30 hover:bg-primary/5"
-              >
+              <Button size="sm" variant="outline" onClick={handleGenerateSummary} disabled={loadingSummary} className="text-primary border-primary/30 hover:bg-primary/5">
                 {loadingSummary ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
                 AI Write
               </Button>
             </div>
-            <Textarea
-              placeholder="A brief summary of your professional background and career goals..."
-              className="min-h-[150px]"
-              value={data.summary}
-              onChange={(e) => store.setSummary(e.target.value)}
-            />
+            <Textarea placeholder="A brief summary of your professional background and career goals..." className="min-h-[150px]" value={data.summary} onChange={(e) => store.setSummary(e.target.value)} />
             <p className="text-xs text-muted-foreground">{data.summary.length} characters</p>
           </div>
         )}
@@ -167,67 +214,70 @@ const EditorPanel = () => {
             {data.experience.length === 0 && (
               <p className="text-sm text-muted-foreground py-8 text-center">No experience added yet. Click "Add" to get started.</p>
             )}
-            {data.experience.map((exp) => (
-              <div key={exp.id} className="border border-border rounded-lg p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">{exp.jobTitle || 'New Position'}</span>
-                  <Button size="icon" variant="ghost" className="text-destructive h-8 w-8" onClick={() => store.removeExperience(exp.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label>Job Title</Label>
-                    <Input placeholder="Software Engineer" value={exp.jobTitle} onChange={(e) => store.updateExperience(exp.id, { jobTitle: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label>Company</Label>
-                    <Input placeholder="Google" value={exp.company} onChange={(e) => store.updateExperience(exp.id, { company: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label>Start Date</Label>
-                    <Input placeholder="Jan 2022" value={exp.startDate} onChange={(e) => store.updateExperience(exp.id, { startDate: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label>End Date</Label>
-                    <Input placeholder="Present" value={exp.endDate} onChange={(e) => store.updateExperience(exp.id, { endDate: e.target.value })} disabled={exp.current} />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label>Bullet Points</Label>
-                  {exp.bullets.map((bullet, i) => {
-                    const bulletKey = `${exp.id}-${i}`;
-                    return (
-                      <div key={i} className="space-y-1">
-                        <div className="flex gap-2">
-                          <Input
-                            placeholder="Describe your achievement..."
-                            value={bullet}
-                            onChange={(e) => store.updateBullet(exp.id, i, e.target.value)}
-                          />
-                          <Button
-                            size="icon"
-                            variant="ghost"
-                            className="h-9 w-9 shrink-0 text-primary hover:bg-primary/5"
-                            onClick={() => handleImproveBullet(exp.id, i, bullet)}
-                            disabled={loadingBullet === bulletKey}
-                            title="Improve with AI"
-                          >
-                            {loadingBullet === bulletKey ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
-                          </Button>
-                          <Button size="icon" variant="ghost" className="text-destructive h-9 w-9 shrink-0" onClick={() => store.removeBullet(exp.id, i)}>
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleExperienceDragEnd}>
+              <SortableContext items={data.experience.map(e => e.id)} strategy={verticalListSortingStrategy}>
+                {data.experience.map((exp) => (
+                  <SortableItem key={exp.id} id={exp.id} className="pl-4">
+                    <div className="border border-border rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-foreground">{exp.jobTitle || 'New Position'}</span>
+                        <Button size="icon" variant="ghost" className="text-destructive h-8 w-8" onClick={() => store.removeExperience(exp.id)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>Job Title</Label>
+                          <Input placeholder="Software Engineer" value={exp.jobTitle} onChange={(e) => store.updateExperience(exp.id, { jobTitle: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label>Company</Label>
+                          <Input placeholder="Google" value={exp.company} onChange={(e) => store.updateExperience(exp.id, { company: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label>Start Date</Label>
+                          <Input placeholder="Jan 2022" value={exp.startDate} onChange={(e) => store.updateExperience(exp.id, { startDate: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label>End Date</Label>
+                          <Input placeholder="Present" value={exp.endDate} onChange={(e) => store.updateExperience(exp.id, { endDate: e.target.value })} disabled={exp.current} />
                         </div>
                       </div>
-                    );
-                  })}
-                  <Button size="sm" variant="ghost" onClick={() => store.addBullet(exp.id)}>
-                    <Plus className="w-3 h-3 mr-1" /> Add Bullet
-                  </Button>
-                </div>
-              </div>
-            ))}
+                      <div className="space-y-2">
+                        <Label>Bullet Points</Label>
+                        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleBulletDragEnd(exp.id)}>
+                          <SortableContext items={exp.bullets.map((_, i) => `${exp.id}-bullet-${i}`)} strategy={verticalListSortingStrategy}>
+                            {exp.bullets.map((bullet, i) => {
+                              const bulletKey = `${exp.id}-${i}`;
+                              const bulletId = `${exp.id}-bullet-${i}`;
+                              return (
+                                <SortableBulletItem key={bulletId} id={bulletId}>
+                                  <Input
+                                    placeholder="Describe your achievement..."
+                                    value={bullet}
+                                    onChange={(e) => store.updateBullet(exp.id, i, e.target.value)}
+                                    className="flex-1"
+                                  />
+                                  <Button size="icon" variant="ghost" className="h-9 w-9 shrink-0 text-primary hover:bg-primary/5" onClick={() => handleImproveBullet(exp.id, i, bullet)} disabled={loadingBullet === bulletKey} title="Improve with AI">
+                                    {loadingBullet === bulletKey ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Sparkles className="w-3.5 h-3.5" />}
+                                  </Button>
+                                  <Button size="icon" variant="ghost" className="text-destructive h-9 w-9 shrink-0" onClick={() => store.removeBullet(exp.id, i)}>
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </SortableBulletItem>
+                              );
+                            })}
+                          </SortableContext>
+                        </DndContext>
+                        <Button size="sm" variant="ghost" onClick={() => store.addBullet(exp.id)}>
+                          <Plus className="w-3 h-3 mr-1" /> Add Bullet
+                        </Button>
+                      </div>
+                    </div>
+                  </SortableItem>
+                ))}
+              </SortableContext>
+            </DndContext>
           </div>
         )}
 
@@ -242,34 +292,40 @@ const EditorPanel = () => {
             {data.education.length === 0 && (
               <p className="text-sm text-muted-foreground py-8 text-center">No education added yet.</p>
             )}
-            {data.education.map((edu) => (
-              <div key={edu.id} className="border border-border rounded-lg p-4 space-y-3">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-foreground">{edu.degree || 'New Entry'}</span>
-                  <Button size="icon" variant="ghost" className="text-destructive h-8 w-8" onClick={() => store.removeEducation(edu.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <Label>Degree</Label>
-                    <Input placeholder="B.S. Computer Science" value={edu.degree} onChange={(e) => store.updateEducation(edu.id, { degree: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label>Institution</Label>
-                    <Input placeholder="MIT" value={edu.institution} onChange={(e) => store.updateEducation(edu.id, { institution: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label>GPA</Label>
-                    <Input placeholder="3.9" value={edu.gpa} onChange={(e) => store.updateEducation(edu.id, { gpa: e.target.value })} />
-                  </div>
-                  <div>
-                    <Label>Graduation Year</Label>
-                    <Input placeholder="2024" value={edu.graduationYear} onChange={(e) => store.updateEducation(edu.id, { graduationYear: e.target.value })} />
-                  </div>
-                </div>
-              </div>
-            ))}
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleEducationDragEnd}>
+              <SortableContext items={data.education.map(e => e.id)} strategy={verticalListSortingStrategy}>
+                {data.education.map((edu) => (
+                  <SortableItem key={edu.id} id={edu.id} className="pl-4">
+                    <div className="border border-border rounded-lg p-4 space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-foreground">{edu.degree || 'New Entry'}</span>
+                        <Button size="icon" variant="ghost" className="text-destructive h-8 w-8" onClick={() => store.removeEducation(edu.id)}>
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <Label>Degree</Label>
+                          <Input placeholder="B.S. Computer Science" value={edu.degree} onChange={(e) => store.updateEducation(edu.id, { degree: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label>Institution</Label>
+                          <Input placeholder="MIT" value={edu.institution} onChange={(e) => store.updateEducation(edu.id, { institution: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label>GPA</Label>
+                          <Input placeholder="3.9" value={edu.gpa} onChange={(e) => store.updateEducation(edu.id, { gpa: e.target.value })} />
+                        </div>
+                        <div>
+                          <Label>Graduation Year</Label>
+                          <Input placeholder="2024" value={edu.graduationYear} onChange={(e) => store.updateEducation(edu.id, { graduationYear: e.target.value })} />
+                        </div>
+                      </div>
+                    </div>
+                  </SortableItem>
+                ))}
+              </SortableContext>
+            </DndContext>
           </div>
         )}
 
@@ -278,13 +334,7 @@ const EditorPanel = () => {
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-semibold text-foreground font-sans">Skills</h3>
               <div className="flex gap-2">
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={handleSuggestSkills}
-                  disabled={loadingSkills}
-                  className="text-primary border-primary/30 hover:bg-primary/5"
-                >
+                <Button size="sm" variant="outline" onClick={handleSuggestSkills} disabled={loadingSkills} className="text-primary border-primary/30 hover:bg-primary/5">
                   {loadingSkills ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Sparkles className="w-4 h-4 mr-1" />}
                   AI Suggest
                 </Button>
@@ -296,30 +346,27 @@ const EditorPanel = () => {
             {data.skills.length === 0 && (
               <p className="text-sm text-muted-foreground py-8 text-center">No skills added yet. Try "AI Suggest" to get started.</p>
             )}
-            <div className="space-y-2">
-              {data.skills.map((skill) => (
-                <div key={skill.id} className="flex gap-2 items-center">
-                  <Input
-                    placeholder="Skill name"
-                    className="flex-1"
-                    value={skill.name}
-                    onChange={(e) => store.updateSkill(skill.id, { name: e.target.value })}
-                  />
-                  <select
-                    className="h-9 rounded-md border border-input bg-background px-3 text-sm"
-                    value={skill.level}
-                    onChange={(e) => store.updateSkill(skill.id, { level: e.target.value as any })}
-                  >
-                    <option value="beginner">Beginner</option>
-                    <option value="intermediate">Intermediate</option>
-                    <option value="expert">Expert</option>
-                  </select>
-                  <Button size="icon" variant="ghost" className="text-destructive h-9 w-9 shrink-0" onClick={() => store.removeSkill(skill.id)}>
-                    <Trash2 className="w-3 h-3" />
-                  </Button>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleSkillsDragEnd}>
+              <SortableContext items={data.skills.map(s => s.id)} strategy={verticalListSortingStrategy}>
+                <div className="space-y-2">
+                  {data.skills.map((skill) => (
+                    <SortableItem key={skill.id} id={skill.id} className="pl-4">
+                      <div className="flex gap-2 items-center">
+                        <Input placeholder="Skill name" className="flex-1" value={skill.name} onChange={(e) => store.updateSkill(skill.id, { name: e.target.value })} />
+                        <select className="h-9 rounded-md border border-input bg-background px-3 text-sm" value={skill.level} onChange={(e) => store.updateSkill(skill.id, { level: e.target.value as any })}>
+                          <option value="beginner">Beginner</option>
+                          <option value="intermediate">Intermediate</option>
+                          <option value="expert">Expert</option>
+                        </select>
+                        <Button size="icon" variant="ghost" className="text-destructive h-9 w-9 shrink-0" onClick={() => store.removeSkill(skill.id)}>
+                          <Trash2 className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </SortableItem>
+                  ))}
                 </div>
-              ))}
-            </div>
+              </SortableContext>
+            </DndContext>
           </div>
         )}
 
