@@ -21,7 +21,7 @@ export const CreativeTemplate = ({ data }: TemplateProps) => {
   return (
     <div style={{ fontFamily: `'${s.body.fontFamily}', sans-serif`, fontSize: s.body.fontSize, lineHeight: s.body.lineHeight, color: s.body.color, background: s.backgroundColor }}>
       {/* Hero header */}
-      <div style={{ padding: `${s.pageMargin * 1.2}px ${s.pageMargin}px`, background: `linear-gradient(135deg, ${accent}, ${accent}cc)`, color: '#fff', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ padding: `${Math.round(s.pageMargin * 1.2)}px ${s.pageMargin}px`, background: `linear-gradient(135deg, ${accent}, ${accent}cc)`, color: '#fff', position: 'relative', overflow: 'hidden' }}>
         <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
         <div style={{ position: 'absolute', bottom: -20, left: '30%', width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
         {personalInfo.fullName && (
