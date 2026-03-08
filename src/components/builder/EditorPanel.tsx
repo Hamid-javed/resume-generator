@@ -372,6 +372,7 @@ const EditorPanel = () => {
           </div>
         )}
 
+        {activeSection === 'style' && <StylePanel />}
         {activeSection === 'ats' && <ATSPanel />}
       </div>
     </div>
