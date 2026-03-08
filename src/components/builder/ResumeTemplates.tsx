@@ -1,12 +1,16 @@
-import { ResumeData } from '@/store/resumeStore';
+import { ResumeData, ResumeStyles, defaultStyles } from '@/store/resumeStore';
 import { Mail, Phone, MapPin, Linkedin, Github, Globe } from 'lucide-react';
 
 interface TemplateProps {
   data: ResumeData;
 }
 
+const getStyles = (data: ResumeData): ResumeStyles => data.styles || defaultStyles;
+
 export const MinimalTemplate = ({ data }: TemplateProps) => {
   const { personalInfo, summary, experience, education, skills } = data;
+  const s = getStyles(data);
+  const vis = s.sectionVisibility;
   const hasContent = personalInfo.fullName || summary || experience.length || education.length || skills.length;
 
   if (!hasContent) {
@@ -18,17 +22,17 @@ export const MinimalTemplate = ({ data }: TemplateProps) => {
   }
 
   return (
-    <div className="p-8 font-sans text-[11px] leading-relaxed" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif", color: '#1a1a1a' }}>
+    <div style={{ padding: s.pageMargin, fontFamily: `'${s.body.fontFamily}', sans-serif`, fontSize: s.body.fontSize, lineHeight: s.body.lineHeight, color: s.body.color, background: s.backgroundColor }}>
       {/* Header */}
       {personalInfo.fullName && (
-        <div className="text-center mb-6">
-          <h1 className="text-2xl font-bold tracking-tight" style={{ color: '#1a1a1a' }}>{personalInfo.fullName}</h1>
-          <div className="flex items-center justify-center gap-4 mt-2 text-[10px]" style={{ color: '#666' }}>
+        <div className="text-center" style={{ marginBottom: s.sectionSpacing }}>
+          <h1 style={{ fontFamily: `'${s.name.fontFamily}', sans-serif`, fontSize: s.name.fontSize, fontWeight: s.name.fontWeight as any, color: s.name.color, letterSpacing: s.name.letterSpacing, lineHeight: s.name.lineHeight }}>{personalInfo.fullName}</h1>
+          <div className="flex items-center justify-center gap-4 mt-2" style={{ fontFamily: `'${s.contact.fontFamily}', sans-serif`, fontSize: s.contact.fontSize, color: s.contact.color }}>
             {personalInfo.email && <span className="flex items-center gap-1"><Mail className="w-3 h-3" />{personalInfo.email}</span>}
             {personalInfo.phone && <span className="flex items-center gap-1"><Phone className="w-3 h-3" />{personalInfo.phone}</span>}
             {personalInfo.location && <span className="flex items-center gap-1"><MapPin className="w-3 h-3" />{personalInfo.location}</span>}
           </div>
-          <div className="flex items-center justify-center gap-4 mt-1 text-[10px]" style={{ color: '#666' }}>
+          <div className="flex items-center justify-center gap-4 mt-1" style={{ fontSize: s.contact.fontSize, color: s.contact.color }}>
             {personalInfo.linkedin && <span className="flex items-center gap-1"><Linkedin className="w-3 h-3" />{personalInfo.linkedin}</span>}
             {personalInfo.github && <span className="flex items-center gap-1"><Github className="w-3 h-3" />{personalInfo.github}</span>}
             {personalInfo.portfolio && <span className="flex items-center gap-1"><Globe className="w-3 h-3" />{personalInfo.portfolio}</span>}
@@ -36,35 +40,30 @@ export const MinimalTemplate = ({ data }: TemplateProps) => {
         </div>
       )}
 
-      {/* Divider */}
-      <div className="border-t mb-5" style={{ borderColor: '#e5e5e5' }} />
+      <div className="border-t" style={{ borderColor: '#e5e5e5', marginBottom: s.sectionSpacing }} />
 
-      {/* Summary */}
-      {summary && (
-        <div className="mb-5">
-          <h2 className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#3B82F6' }}>Summary</h2>
-          <p style={{ color: '#444' }}>{summary}</p>
+      {vis.summary && summary && (
+        <div style={{ marginBottom: s.sectionSpacing }}>
+          <h2 className="uppercase tracking-widest" style={{ fontFamily: `'${s.headings.fontFamily}', sans-serif`, fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: s.accentColor, letterSpacing: s.headings.letterSpacing, marginBottom: 8 }}>Summary</h2>
+          <p style={{ color: s.body.color, fontWeight: s.body.fontWeight as any }}>{summary}</p>
         </div>
       )}
 
-      {/* Experience */}
-      {experience.length > 0 && (
-        <div className="mb-5">
-          <h2 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#3B82F6' }}>Experience</h2>
+      {vis.experience && experience.length > 0 && (
+        <div style={{ marginBottom: s.sectionSpacing }}>
+          <h2 className="uppercase tracking-widest" style={{ fontFamily: `'${s.headings.fontFamily}', sans-serif`, fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: s.accentColor, letterSpacing: s.headings.letterSpacing, marginBottom: 12 }}>Experience</h2>
           {experience.map((exp) => (
             <div key={exp.id} className="mb-3">
               <div className="flex justify-between items-baseline">
                 <div>
-                  <span className="font-semibold" style={{ color: '#1a1a1a' }}>{exp.jobTitle}</span>
-                  {exp.company && <span style={{ color: '#666' }}> · {exp.company}</span>}
+                  <span className="font-semibold" style={{ color: s.name.color }}>{exp.jobTitle}</span>
+                  {exp.company && <span style={{ color: s.contact.color }}> · {exp.company}</span>}
                 </div>
-                <span className="text-[10px] shrink-0" style={{ color: '#999' }}>{exp.startDate}{exp.endDate ? ` – ${exp.endDate}` : ''}</span>
+                <span className="shrink-0" style={{ fontSize: s.contact.fontSize, color: '#999' }}>{exp.startDate}{exp.endDate ? ` – ${exp.endDate}` : ''}</span>
               </div>
               {exp.bullets.filter(b => b).length > 0 && (
-                <ul className="mt-1 ml-4 list-disc" style={{ color: '#444' }}>
-                  {exp.bullets.filter(b => b).map((bullet, i) => (
-                    <li key={i}>{bullet}</li>
-                  ))}
+                <ul className="mt-1 ml-4 list-disc" style={{ color: s.body.color }}>
+                  {exp.bullets.filter(b => b).map((bullet, i) => <li key={i}>{bullet}</li>)}
                 </ul>
               )}
             </div>
@@ -72,32 +71,30 @@ export const MinimalTemplate = ({ data }: TemplateProps) => {
         </div>
       )}
 
-      {/* Education */}
-      {education.length > 0 && (
-        <div className="mb-5">
-          <h2 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#3B82F6' }}>Education</h2>
+      {vis.education && education.length > 0 && (
+        <div style={{ marginBottom: s.sectionSpacing }}>
+          <h2 className="uppercase tracking-widest" style={{ fontFamily: `'${s.headings.fontFamily}', sans-serif`, fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: s.accentColor, letterSpacing: s.headings.letterSpacing, marginBottom: 12 }}>Education</h2>
           {education.map((edu) => (
             <div key={edu.id} className="mb-2">
               <div className="flex justify-between items-baseline">
                 <div>
-                  <span className="font-semibold" style={{ color: '#1a1a1a' }}>{edu.degree}</span>
-                  {edu.institution && <span style={{ color: '#666' }}> · {edu.institution}</span>}
+                  <span className="font-semibold" style={{ color: s.name.color }}>{edu.degree}</span>
+                  {edu.institution && <span style={{ color: s.contact.color }}> · {edu.institution}</span>}
                 </div>
-                <span className="text-[10px] shrink-0" style={{ color: '#999' }}>{edu.graduationYear}</span>
+                <span className="shrink-0" style={{ fontSize: s.contact.fontSize, color: '#999' }}>{edu.graduationYear}</span>
               </div>
-              {edu.gpa && <p className="text-[10px]" style={{ color: '#666' }}>GPA: {edu.gpa}</p>}
+              {edu.gpa && <p style={{ fontSize: s.contact.fontSize, color: s.contact.color }}>GPA: {edu.gpa}</p>}
             </div>
           ))}
         </div>
       )}
 
-      {/* Skills */}
-      {skills.length > 0 && (
+      {vis.skills && skills.length > 0 && (
         <div>
-          <h2 className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#3B82F6' }}>Skills</h2>
+          <h2 className="uppercase tracking-widest" style={{ fontFamily: `'${s.headings.fontFamily}', sans-serif`, fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: s.accentColor, letterSpacing: s.headings.letterSpacing, marginBottom: 8 }}>Skills</h2>
           <div className="flex flex-wrap gap-1.5">
             {skills.map((skill) => (
-              <span key={skill.id} className="px-2 py-0.5 rounded text-[10px] font-medium" style={{ background: '#EFF6FF', color: '#3B82F6' }}>
+              <span key={skill.id} className="px-2 py-0.5 rounded font-medium" style={{ fontSize: s.contact.fontSize, background: s.accentColor + '15', color: s.accentColor }}>
                 {skill.name || 'Skill'}
               </span>
             ))}
@@ -110,6 +107,8 @@ export const MinimalTemplate = ({ data }: TemplateProps) => {
 
 export const ExecutiveTemplate = ({ data }: TemplateProps) => {
   const { personalInfo, summary, experience, education, skills } = data;
+  const s = getStyles(data);
+  const vis = s.sectionVisibility;
   const hasContent = personalInfo.fullName || summary || experience.length || education.length || skills.length;
 
   if (!hasContent) {
@@ -121,39 +120,38 @@ export const ExecutiveTemplate = ({ data }: TemplateProps) => {
   }
 
   return (
-    <div className="text-[11px] leading-relaxed" style={{ fontFamily: "Georgia, serif", color: '#1a1a1a' }}>
-      {/* Header */}
-      <div className="px-8 py-6" style={{ background: '#1E293B' }}>
+    <div style={{ fontFamily: `'${s.body.fontFamily}', serif`, fontSize: s.body.fontSize, lineHeight: s.body.lineHeight, color: s.body.color, background: s.backgroundColor }}>
+      <div style={{ padding: `${s.pageMargin * 0.75}px ${s.pageMargin}px`, background: s.headerBgColor === '#ffffff' ? '#1E293B' : s.headerBgColor }}>
         {personalInfo.fullName && (
-          <h1 className="text-2xl font-bold tracking-wide" style={{ color: '#fff' }}>{personalInfo.fullName}</h1>
+          <h1 className="tracking-wide" style={{ fontFamily: `'${s.name.fontFamily}', serif`, fontSize: s.name.fontSize, fontWeight: s.name.fontWeight as any, color: '#fff' }}>{personalInfo.fullName}</h1>
         )}
-        <div className="flex gap-4 mt-2 text-[10px]" style={{ color: '#94A3B8' }}>
+        <div className="flex gap-4 mt-2" style={{ fontSize: s.contact.fontSize, color: '#94A3B8' }}>
           {personalInfo.email && <span>{personalInfo.email}</span>}
           {personalInfo.phone && <span>{personalInfo.phone}</span>}
           {personalInfo.location && <span>{personalInfo.location}</span>}
         </div>
       </div>
 
-      <div className="p-8">
-        {summary && (
-          <div className="mb-5">
-            <h2 className="text-xs font-bold uppercase tracking-widest mb-2 pb-1 border-b-2" style={{ color: '#1E293B', borderColor: '#1E293B' }}>Professional Summary</h2>
-            <p style={{ color: '#444' }}>{summary}</p>
+      <div style={{ padding: s.pageMargin }}>
+        {vis.summary && summary && (
+          <div style={{ marginBottom: s.sectionSpacing }}>
+            <h2 className="uppercase tracking-widest pb-1 border-b-2" style={{ fontFamily: `'${s.headings.fontFamily}', serif`, fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: s.accentColor, borderColor: s.accentColor, marginBottom: 8 }}>Professional Summary</h2>
+            <p style={{ color: s.body.color }}>{summary}</p>
           </div>
         )}
 
-        {experience.length > 0 && (
-          <div className="mb-5">
-            <h2 className="text-xs font-bold uppercase tracking-widest mb-3 pb-1 border-b-2" style={{ color: '#1E293B', borderColor: '#1E293B' }}>Experience</h2>
+        {vis.experience && experience.length > 0 && (
+          <div style={{ marginBottom: s.sectionSpacing }}>
+            <h2 className="uppercase tracking-widest pb-1 border-b-2" style={{ fontFamily: `'${s.headings.fontFamily}', serif`, fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: s.accentColor, borderColor: s.accentColor, marginBottom: 12 }}>Experience</h2>
             {experience.map((exp) => (
               <div key={exp.id} className="mb-3">
                 <div className="flex justify-between">
-                  <strong style={{ color: '#1E293B' }}>{exp.jobTitle}</strong>
-                  <span className="text-[10px]" style={{ color: '#999' }}>{exp.startDate} – {exp.endDate || 'Present'}</span>
+                  <strong style={{ color: s.name.color }}>{exp.jobTitle}</strong>
+                  <span style={{ fontSize: s.contact.fontSize, color: '#999' }}>{exp.startDate} – {exp.endDate || 'Present'}</span>
                 </div>
-                {exp.company && <p className="italic" style={{ color: '#666' }}>{exp.company}</p>}
+                {exp.company && <p className="italic" style={{ color: s.contact.color }}>{exp.company}</p>}
                 {exp.bullets.filter(b => b).length > 0 && (
-                  <ul className="mt-1 ml-4 list-disc" style={{ color: '#444' }}>
+                  <ul className="mt-1 ml-4 list-disc" style={{ color: s.body.color }}>
                     {exp.bullets.filter(b => b).map((b, i) => <li key={i}>{b}</li>)}
                   </ul>
                 )}
@@ -162,23 +160,23 @@ export const ExecutiveTemplate = ({ data }: TemplateProps) => {
           </div>
         )}
 
-        {education.length > 0 && (
-          <div className="mb-5">
-            <h2 className="text-xs font-bold uppercase tracking-widest mb-3 pb-1 border-b-2" style={{ color: '#1E293B', borderColor: '#1E293B' }}>Education</h2>
+        {vis.education && education.length > 0 && (
+          <div style={{ marginBottom: s.sectionSpacing }}>
+            <h2 className="uppercase tracking-widest pb-1 border-b-2" style={{ fontFamily: `'${s.headings.fontFamily}', serif`, fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: s.accentColor, borderColor: s.accentColor, marginBottom: 12 }}>Education</h2>
             {education.map((edu) => (
               <div key={edu.id} className="mb-2">
-                <strong style={{ color: '#1E293B' }}>{edu.degree}</strong>
-                {edu.institution && <span style={{ color: '#666' }}> — {edu.institution}</span>}
+                <strong style={{ color: s.name.color }}>{edu.degree}</strong>
+                {edu.institution && <span style={{ color: s.contact.color }}> — {edu.institution}</span>}
                 {edu.graduationYear && <span style={{ color: '#999' }}> ({edu.graduationYear})</span>}
               </div>
             ))}
           </div>
         )}
 
-        {skills.length > 0 && (
+        {vis.skills && skills.length > 0 && (
           <div>
-            <h2 className="text-xs font-bold uppercase tracking-widest mb-2 pb-1 border-b-2" style={{ color: '#1E293B', borderColor: '#1E293B' }}>Skills</h2>
-            <p style={{ color: '#444' }}>{skills.map(s => s.name).filter(Boolean).join(' · ')}</p>
+            <h2 className="uppercase tracking-widest pb-1 border-b-2" style={{ fontFamily: `'${s.headings.fontFamily}', serif`, fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: s.accentColor, borderColor: s.accentColor, marginBottom: 8 }}>Skills</h2>
+            <p style={{ color: s.body.color }}>{skills.map(sk => sk.name).filter(Boolean).join(' · ')}</p>
           </div>
         )}
       </div>
@@ -188,6 +186,8 @@ export const ExecutiveTemplate = ({ data }: TemplateProps) => {
 
 export const BoldTemplate = ({ data }: TemplateProps) => {
   const { personalInfo, summary, experience, education, skills } = data;
+  const s = getStyles(data);
+  const vis = s.sectionVisibility;
   const hasContent = personalInfo.fullName || summary || experience.length || education.length || skills.length;
 
   if (!hasContent) {
@@ -198,14 +198,16 @@ export const BoldTemplate = ({ data }: TemplateProps) => {
     );
   }
 
+  const sidebarBg = s.accentColor || '#7C3AED';
+
   return (
-    <div className="flex text-[11px] leading-relaxed min-h-full" style={{ fontFamily: "'Plus Jakarta Sans', sans-serif" }}>
+    <div className="flex min-h-full" style={{ fontFamily: `'${s.body.fontFamily}', sans-serif`, fontSize: s.body.fontSize, lineHeight: s.body.lineHeight }}>
       {/* Sidebar */}
-      <div className="w-[35%] p-6" style={{ background: '#7C3AED', color: '#fff' }}>
+      <div className="w-[35%]" style={{ padding: s.pageMargin * 0.75, background: sidebarBg, color: '#fff' }}>
         {personalInfo.fullName && (
-          <h1 className="text-xl font-bold mb-4">{personalInfo.fullName}</h1>
+          <h1 className="mb-4" style={{ fontFamily: `'${s.name.fontFamily}', sans-serif`, fontSize: s.name.fontSize * 0.85, fontWeight: s.name.fontWeight as any }}>{personalInfo.fullName}</h1>
         )}
-        <div className="space-y-1 text-[10px] mb-6" style={{ color: 'rgba(255,255,255,0.8)' }}>
+        <div className="space-y-1 mb-6" style={{ fontSize: s.contact.fontSize, color: 'rgba(255,255,255,0.8)' }}>
           {personalInfo.email && <p>{personalInfo.email}</p>}
           {personalInfo.phone && <p>{personalInfo.phone}</p>}
           {personalInfo.location && <p>{personalInfo.location}</p>}
@@ -213,18 +215,15 @@ export const BoldTemplate = ({ data }: TemplateProps) => {
           {personalInfo.github && <p>{personalInfo.github}</p>}
         </div>
 
-        {skills.length > 0 && (
+        {vis.skills && skills.length > 0 && (
           <div>
-            <h2 className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>Skills</h2>
+            <h2 className="uppercase tracking-widest mb-2" style={{ fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: 'rgba(255,255,255,0.6)' }}>Skills</h2>
             <div className="space-y-1.5">
               {skills.map((skill) => (
                 <div key={skill.id}>
-                  <span className="text-[10px]">{skill.name}</span>
+                  <span style={{ fontSize: s.contact.fontSize }}>{skill.name}</span>
                   <div className="w-full h-1 rounded-full mt-0.5" style={{ background: 'rgba(255,255,255,0.2)' }}>
-                    <div className="h-1 rounded-full" style={{
-                      background: '#fff',
-                      width: skill.level === 'expert' ? '100%' : skill.level === 'intermediate' ? '66%' : '33%'
-                    }} />
+                    <div className="h-1 rounded-full" style={{ background: '#fff', width: skill.level === 'expert' ? '100%' : skill.level === 'intermediate' ? '66%' : '33%' }} />
                   </div>
                 </div>
               ))}
@@ -232,11 +231,11 @@ export const BoldTemplate = ({ data }: TemplateProps) => {
           </div>
         )}
 
-        {education.length > 0 && (
+        {vis.education && education.length > 0 && (
           <div className="mt-6">
-            <h2 className="text-[10px] font-bold uppercase tracking-widest mb-2" style={{ color: 'rgba(255,255,255,0.6)' }}>Education</h2>
+            <h2 className="uppercase tracking-widest mb-2" style={{ fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: 'rgba(255,255,255,0.6)' }}>Education</h2>
             {education.map((edu) => (
-              <div key={edu.id} className="mb-2 text-[10px]">
+              <div key={edu.id} className="mb-2" style={{ fontSize: s.contact.fontSize }}>
                 <p className="font-semibold">{edu.degree}</p>
                 <p style={{ color: 'rgba(255,255,255,0.7)' }}>{edu.institution}</p>
                 <p style={{ color: 'rgba(255,255,255,0.5)' }}>{edu.graduationYear}</p>
@@ -247,26 +246,26 @@ export const BoldTemplate = ({ data }: TemplateProps) => {
       </div>
 
       {/* Main */}
-      <div className="flex-1 p-6" style={{ color: '#1a1a1a' }}>
-        {summary && (
-          <div className="mb-5">
-            <h2 className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: '#7C3AED' }}>About Me</h2>
-            <p style={{ color: '#444' }}>{summary}</p>
+      <div className="flex-1" style={{ padding: s.pageMargin * 0.75, color: s.body.color, background: s.backgroundColor }}>
+        {vis.summary && summary && (
+          <div style={{ marginBottom: s.sectionSpacing }}>
+            <h2 className="uppercase tracking-widest" style={{ fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: sidebarBg, marginBottom: 8 }}>About Me</h2>
+            <p>{summary}</p>
           </div>
         )}
 
-        {experience.length > 0 && (
+        {vis.experience && experience.length > 0 && (
           <div>
-            <h2 className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#7C3AED' }}>Experience</h2>
+            <h2 className="uppercase tracking-widest" style={{ fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: sidebarBg, marginBottom: 12 }}>Experience</h2>
             {experience.map((exp) => (
-              <div key={exp.id} className="mb-4 pl-3" style={{ borderLeft: '2px solid #7C3AED' }}>
+              <div key={exp.id} className="mb-4 pl-3" style={{ borderLeft: `2px solid ${sidebarBg}` }}>
                 <div className="flex justify-between">
                   <strong>{exp.jobTitle}</strong>
-                  <span className="text-[10px]" style={{ color: '#999' }}>{exp.startDate} – {exp.endDate || 'Present'}</span>
+                  <span style={{ fontSize: s.contact.fontSize, color: '#999' }}>{exp.startDate} – {exp.endDate || 'Present'}</span>
                 </div>
-                {exp.company && <p style={{ color: '#7C3AED' }}>{exp.company}</p>}
+                {exp.company && <p style={{ color: sidebarBg }}>{exp.company}</p>}
                 {exp.bullets.filter(b => b).length > 0 && (
-                  <ul className="mt-1 ml-3 list-disc" style={{ color: '#444' }}>
+                  <ul className="mt-1 ml-3 list-disc">
                     {exp.bullets.filter(b => b).map((b, i) => <li key={i}>{b}</li>)}
                   </ul>
                 )}
@@ -281,6 +280,8 @@ export const BoldTemplate = ({ data }: TemplateProps) => {
 
 export const DeveloperTemplate = ({ data }: TemplateProps) => {
   const { personalInfo, summary, experience, education, skills } = data;
+  const s = getStyles(data);
+  const vis = s.sectionVisibility;
   const hasContent = personalInfo.fullName || summary || experience.length || education.length || skills.length;
 
   if (!hasContent) {
@@ -291,15 +292,17 @@ export const DeveloperTemplate = ({ data }: TemplateProps) => {
     );
   }
 
+  const terminalBg = s.backgroundColor === '#ffffff' ? '#0F172A' : s.backgroundColor;
+  const terminalAccent = s.accentColor || '#10B981';
+
   return (
-    <div className="p-8 text-[11px] leading-relaxed" style={{ fontFamily: "'JetBrains Mono', 'Fira Code', monospace", color: '#E2E8F0', background: '#0F172A' }}>
-      {/* Header */}
+    <div style={{ padding: s.pageMargin, fontFamily: `'${s.body.fontFamily}', 'JetBrains Mono', monospace`, fontSize: s.body.fontSize, lineHeight: s.body.lineHeight, color: '#E2E8F0', background: terminalBg }}>
       {personalInfo.fullName && (
-        <div className="mb-6">
-          <h1 className="text-2xl font-bold" style={{ color: '#10B981' }}>
+        <div style={{ marginBottom: s.sectionSpacing }}>
+          <h1 style={{ fontFamily: `'${s.name.fontFamily}', monospace`, fontSize: s.name.fontSize, fontWeight: s.name.fontWeight as any, color: terminalAccent }}>
             {'> '}{personalInfo.fullName}
           </h1>
-          <div className="flex gap-3 mt-2 text-[10px]" style={{ color: '#64748B' }}>
+          <div className="flex gap-3 mt-2" style={{ fontSize: s.contact.fontSize, color: '#64748B' }}>
             {personalInfo.email && <span>{personalInfo.email}</span>}
             {personalInfo.phone && <span>{personalInfo.phone}</span>}
             {personalInfo.github && <span>{personalInfo.github}</span>}
@@ -307,21 +310,21 @@ export const DeveloperTemplate = ({ data }: TemplateProps) => {
         </div>
       )}
 
-      {summary && (
-        <div className="mb-5">
-          <h2 className="text-xs font-bold mb-2" style={{ color: '#10B981' }}>## Summary</h2>
+      {vis.summary && summary && (
+        <div style={{ marginBottom: s.sectionSpacing }}>
+          <h2 style={{ fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: terminalAccent, marginBottom: 8 }}>## Summary</h2>
           <p style={{ color: '#94A3B8' }}>{summary}</p>
         </div>
       )}
 
-      {experience.length > 0 && (
-        <div className="mb-5">
-          <h2 className="text-xs font-bold mb-3" style={{ color: '#10B981' }}>## Experience</h2>
+      {vis.experience && experience.length > 0 && (
+        <div style={{ marginBottom: s.sectionSpacing }}>
+          <h2 style={{ fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: terminalAccent, marginBottom: 12 }}>## Experience</h2>
           {experience.map((exp) => (
-            <div key={exp.id} className="mb-3 pl-3" style={{ borderLeft: '2px solid #10B981' }}>
+            <div key={exp.id} className="mb-3 pl-3" style={{ borderLeft: `2px solid ${terminalAccent}` }}>
               <div className="flex justify-between">
                 <span style={{ color: '#E2E8F0' }}>{exp.jobTitle} <span style={{ color: '#64748B' }}>@ {exp.company}</span></span>
-                <span className="text-[10px]" style={{ color: '#475569' }}>{exp.startDate} – {exp.endDate || 'Present'}</span>
+                <span style={{ fontSize: s.contact.fontSize, color: '#475569' }}>{exp.startDate} – {exp.endDate || 'Present'}</span>
               </div>
               {exp.bullets.filter(b => b).length > 0 && (
                 <ul className="mt-1 ml-3" style={{ color: '#94A3B8' }}>
@@ -333,9 +336,9 @@ export const DeveloperTemplate = ({ data }: TemplateProps) => {
         </div>
       )}
 
-      {education.length > 0 && (
-        <div className="mb-5">
-          <h2 className="text-xs font-bold mb-2" style={{ color: '#10B981' }}>## Education</h2>
+      {vis.education && education.length > 0 && (
+        <div style={{ marginBottom: s.sectionSpacing }}>
+          <h2 style={{ fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: terminalAccent, marginBottom: 8 }}>## Education</h2>
           {education.map((edu) => (
             <div key={edu.id} className="mb-1">
               <span style={{ color: '#E2E8F0' }}>{edu.degree}</span>
@@ -345,12 +348,12 @@ export const DeveloperTemplate = ({ data }: TemplateProps) => {
         </div>
       )}
 
-      {skills.length > 0 && (
+      {vis.skills && skills.length > 0 && (
         <div>
-          <h2 className="text-xs font-bold mb-2" style={{ color: '#10B981' }}>## Skills</h2>
+          <h2 style={{ fontSize: s.headings.fontSize, fontWeight: s.headings.fontWeight as any, color: terminalAccent, marginBottom: 8 }}>## Skills</h2>
           <div className="flex flex-wrap gap-1.5">
             {skills.map((skill) => (
-              <span key={skill.id} className="px-2 py-0.5 rounded text-[10px]" style={{ background: '#1E293B', color: '#10B981', border: '1px solid #10B981' }}>
+              <span key={skill.id} className="px-2 py-0.5 rounded" style={{ fontSize: s.contact.fontSize, background: terminalBg === '#0F172A' ? '#1E293B' : 'rgba(0,0,0,0.2)', color: terminalAccent, border: `1px solid ${terminalAccent}` }}>
                 {skill.name || 'skill'}
               </span>
             ))}
