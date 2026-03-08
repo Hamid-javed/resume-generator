@@ -3,6 +3,10 @@ import { ArrowLeft, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useResumeStore, TemplateId, defaultStyles } from '@/store/resumeStore';
 import { MinimalTemplate, ExecutiveTemplate, BoldTemplate, DeveloperTemplate } from '@/components/builder/ResumeTemplates';
+import { CorporateTemplate } from '@/components/builder/templates/CorporateTemplate';
+import { ATSClassicTemplate } from '@/components/builder/templates/ATSClassicTemplate';
+import { CreativeTemplate } from '@/components/builder/templates/CreativeTemplate';
+import { TwoColumnTemplate } from '@/components/builder/templates/TwoColumnTemplate';
 import { sampleResumeData } from '@/lib/sampleResumeData';
 
 const templates: { id: TemplateId; name: string; category: string; color: string; description: string }[] = [
@@ -10,6 +14,10 @@ const templates: { id: TemplateId; name: string; category: string; color: string
   { id: 'executive', name: 'Executive', category: 'Professional', color: '#1E293B', description: 'Classic dark navy header with serif fonts. Perfect for senior roles.' },
   { id: 'bold', name: 'Bold', category: 'Creative', color: '#7C3AED', description: 'Strong typography with a full color sidebar and geometric accents.' },
   { id: 'developer', name: 'Developer', category: 'Tech', color: '#10B981', description: 'Monospace accents, dark mode aesthetic. GitHub-inspired for tech roles.' },
+  { id: 'corporate', name: 'Corporate', category: 'Professional', color: '#0F4C81', description: 'Traditional corporate style with serif fonts and structured layout.' },
+  { id: 'ats-classic', name: 'ATS Classic', category: 'ATS-Optimized', color: '#111827', description: 'Maximum ATS compatibility with clean formatting and standard sections.' },
+  { id: 'creative', name: 'Creative', category: 'Creative', color: '#E11D48', description: 'Bold gradient header with timeline layout and geometric accents.' },
+  { id: 'two-column', name: 'Two-Column', category: 'Modern', color: '#2563EB', description: 'Efficient two-column layout with sidebar for contact, skills, and education.' },
 ];
 
 const templateComponents: Record<TemplateId, React.FC<any>> = {
@@ -17,6 +25,10 @@ const templateComponents: Record<TemplateId, React.FC<any>> = {
   executive: ExecutiveTemplate,
   bold: BoldTemplate,
   developer: DeveloperTemplate,
+  corporate: CorporateTemplate,
+  'ats-classic': ATSClassicTemplate,
+  creative: CreativeTemplate,
+  'two-column': TwoColumnTemplate,
 };
 
 const templateStyles: Record<TemplateId, typeof defaultStyles> = {
@@ -24,6 +36,10 @@ const templateStyles: Record<TemplateId, typeof defaultStyles> = {
   executive: { ...defaultStyles, accentColor: '#1E293B', headerBgColor: '#1E293B' },
   bold: { ...defaultStyles, accentColor: '#7C3AED' },
   developer: { ...defaultStyles, accentColor: '#10B981' },
+  corporate: { ...defaultStyles, accentColor: '#0F4C81' },
+  'ats-classic': { ...defaultStyles, accentColor: '#111827' },
+  creative: { ...defaultStyles, accentColor: '#E11D48' },
+  'two-column': { ...defaultStyles, accentColor: '#2563EB' },
 };
 
 const TemplatesPage = () => {

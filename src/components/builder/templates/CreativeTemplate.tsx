@@ -25,7 +25,7 @@ export const CreativeTemplate = ({ data }: TemplateProps) => {
         <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(255,255,255,0.1)' }} />
         <div style={{ position: 'absolute', bottom: -20, left: '30%', width: 100, height: 100, borderRadius: '50%', background: 'rgba(255,255,255,0.07)' }} />
         {personalInfo.fullName && (
-          <h1 style={{ fontFamily: `'${s.name.fontFamily}', sans-serif`, fontSize: `${parseFloat(s.name.fontSize) * 1.2}px`, fontWeight: s.name.fontWeight as any, letterSpacing: s.name.letterSpacing, position: 'relative', zIndex: 1 }}>
+          <h1 style={{ fontFamily: `'${s.name.fontFamily}', sans-serif`, fontSize: `${parseFloat(String(s.name.fontSize)) * 1.2}px`, fontWeight: s.name.fontWeight as any, letterSpacing: s.name.letterSpacing, position: 'relative', zIndex: 1 }}>
             {personalInfo.fullName}
           </h1>
         )}

@@ -25,7 +25,7 @@ export const TwoColumnTemplate = ({ data }: TemplateProps) => {
       <div style={{ width: '38%', padding: s.pageMargin * 0.75, background: sidebarBg, borderRight: `3px solid ${accent}` }}>
         {personalInfo.fullName && (
           <div style={{ marginBottom: s.sectionSpacing }}>
-            <h1 style={{ fontFamily: `'${s.name.fontFamily}', sans-serif`, fontSize: `${parseFloat(s.name.fontSize) * 0.85}px`, fontWeight: s.name.fontWeight as any, color: accent, lineHeight: 1.2 }}>
+            <h1 style={{ fontFamily: `'${s.name.fontFamily}', sans-serif`, fontSize: `${parseFloat(String(s.name.fontSize)) * 0.85}px`, fontWeight: s.name.fontWeight as any, color: accent, lineHeight: 1.2 }}>
               {personalInfo.fullName}
             </h1>
           </div>
