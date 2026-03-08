@@ -104,9 +104,24 @@ const BuilderPage = () => {
             {saving ? <Check className="w-4 h-4 mr-1" /> : <Save className="w-4 h-4 mr-1" />}
             {saving ? 'Saved' : 'Save'}
           </Button>
-          <Button variant="outline" size="sm">
-            <Download className="w-4 h-4 mr-1" />
-            Export PDF
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={exporting}
+            onClick={async () => {
+              setExporting(true);
+              try {
+                await exportResumePdf('resume-preview', resumeTitle);
+                toast.success('PDF exported successfully');
+              } catch {
+                toast.error('Failed to export PDF');
+              } finally {
+                setExporting(false);
+              }
+            }}
+          >
+            {exporting ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
+            {exporting ? 'Exporting...' : 'Export PDF'}
           </Button>
         </div>
       </header>

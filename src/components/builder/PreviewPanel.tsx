@@ -42,6 +42,7 @@ const PreviewPanel = () => {
       {/* Resume preview */}
       <div className="flex-1 overflow-auto p-6 flex justify-center">
         <div
+          id="resume-preview"
           className="bg-card shadow-xl rounded-sm w-full max-w-[595px] min-h-[842px] overflow-hidden"
           style={{ aspectRatio: '595/842' }}
         >
