@@ -72,6 +72,10 @@ interface ResumeState {
   addSkill: () => void;
   updateSkill: (id: string, skill: Partial<Skill>) => void;
   removeSkill: (id: string) => void;
+  reorderExperience: (oldIndex: number, newIndex: number) => void;
+  reorderEducation: (oldIndex: number, newIndex: number) => void;
+  reorderSkills: (oldIndex: number, newIndex: number) => void;
+  reorderBullets: (expId: string, oldIndex: number, newIndex: number) => void;
   setTemplateId: (id: TemplateId) => void;
   setActiveSection: (section: string) => void;
   setResumeTitle: (title: string) => void;
