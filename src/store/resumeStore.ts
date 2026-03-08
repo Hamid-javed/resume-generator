@@ -127,6 +127,9 @@ interface ResumeState {
   reorderEducation: (oldIndex: number, newIndex: number) => void;
   reorderSkills: (oldIndex: number, newIndex: number) => void;
   reorderBullets: (expId: string, oldIndex: number, newIndex: number) => void;
+  updateStyles: (styles: Partial<ResumeStyles>) => void;
+  updateSectionStyle: (section: keyof Pick<ResumeStyles, 'name' | 'headings' | 'body' | 'contact'>, style: Partial<SectionStyle>) => void;
+  updateSectionVisibility: (section: keyof ResumeStyles['sectionVisibility'], visible: boolean) => void;
   setTemplateId: (id: TemplateId) => void;
   setActiveSection: (section: string) => void;
   setResumeTitle: (title: string) => void;
