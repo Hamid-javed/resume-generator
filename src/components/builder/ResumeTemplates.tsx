@@ -1,5 +1,6 @@
 import { ResumeData, ResumeStyles, defaultStyles } from '@/store/resumeStore';
 import { Mail, Phone, MapPin, Linkedin, Github, Globe } from 'lucide-react';
+import { sampleResumeData } from '@/lib/sampleResumeData';
 
 interface TemplateProps {
   data: ResumeData;
@@ -14,11 +15,7 @@ export const MinimalTemplate = ({ data }: TemplateProps) => {
   const hasContent = personalInfo.fullName || summary || experience.length || education.length || skills.length;
 
   if (!hasContent) {
-    return (
-      <div className="flex items-center justify-center h-full text-muted-foreground">
-        <p className="text-sm">Start filling in your details to see the preview</p>
-      </div>
-    );
+    return <MinimalTemplate data={sampleResumeData} />;
   }
 
   return (
@@ -112,11 +109,7 @@ export const ExecutiveTemplate = ({ data }: TemplateProps) => {
   const hasContent = personalInfo.fullName || summary || experience.length || education.length || skills.length;
 
   if (!hasContent) {
-    return (
-      <div className="flex items-center justify-center h-full text-muted-foreground">
-        <p className="text-sm">Start filling in your details to see the preview</p>
-      </div>
-    );
+    return <ExecutiveTemplate data={sampleResumeData} />;
   }
 
   return (
@@ -191,11 +184,7 @@ export const BoldTemplate = ({ data }: TemplateProps) => {
   const hasContent = personalInfo.fullName || summary || experience.length || education.length || skills.length;
 
   if (!hasContent) {
-    return (
-      <div className="flex items-center justify-center h-full text-muted-foreground">
-        <p className="text-sm">Start filling in your details to see the preview</p>
-      </div>
-    );
+    return <BoldTemplate data={sampleResumeData} />;
   }
 
   const sidebarBg = s.accentColor || '#7C3AED';
@@ -285,11 +274,7 @@ export const DeveloperTemplate = ({ data }: TemplateProps) => {
   const hasContent = personalInfo.fullName || summary || experience.length || education.length || skills.length;
 
   if (!hasContent) {
-    return (
-      <div className="flex items-center justify-center h-full text-muted-foreground">
-        <p className="text-sm">Start filling in your details to see the preview</p>
-      </div>
-    );
+    return <DeveloperTemplate data={sampleResumeData} />;
   }
 
   const terminalBg = s.backgroundColor === '#ffffff' ? '#0F172A' : s.backgroundColor;

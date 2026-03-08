@@ -1,6 +1,6 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { FileText, ArrowLeft, Download, Save, Check } from 'lucide-react';
+import { FileText, ArrowLeft, Download, Save, Check, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import EditorPanel from '@/components/builder/EditorPanel';
 import PreviewPanel from '@/components/builder/PreviewPanel';
@@ -9,12 +9,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Json } from '@/integrations/supabase/types';
+import { exportResumePdf } from '@/lib/exportPdf';
 
 const BuilderPage = () => {
   const navigate = useNavigate();
   const { resumeId } = useParams();
   const { user, loading: authLoading } = useAuth();
   const { loadResume, saveResume, resetStore, resumeTitle, saving, data, templateId } = useResumeStore();
+  const [exporting, setExporting] = useState(false);
   const autoSaveRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Redirect if not logged in
@@ -102,9 +104,24 @@ const BuilderPage = () => {
             {saving ? <Check className="w-4 h-4 mr-1" /> : <Save className="w-4 h-4 mr-1" />}
             {saving ? 'Saved' : 'Save'}
           </Button>
-          <Button variant="outline" size="sm">
-            <Download className="w-4 h-4 mr-1" />
-            Export PDF
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={exporting}
+            onClick={async () => {
+              setExporting(true);
+              try {
+                await exportResumePdf('resume-preview', resumeTitle);
+                toast.success('PDF exported successfully');
+              } catch {
+                toast.error('Failed to export PDF');
+              } finally {
+                setExporting(false);
+              }
+            }}
+          >
+            {exporting ? <Loader2 className="w-4 h-4 mr-1 animate-spin" /> : <Download className="w-4 h-4 mr-1" />}
+            {exporting ? 'Exporting...' : 'Export PDF'}
           </Button>
         </div>
       </header>
