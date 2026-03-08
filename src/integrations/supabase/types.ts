@@ -14,7 +14,71 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      resume_versions: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          resume_id: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          resume_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          resume_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "resume_versions_resume_id_fkey"
+            columns: ["resume_id"]
+            isOneToOne: false
+            referencedRelation: "resumes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      resumes: {
+        Row: {
+          content: Json
+          created_at: string
+          id: string
+          is_public: boolean
+          slug: string | null
+          template_id: string
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          content?: Json
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          slug?: string | null
+          template_id?: string
+          title?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          content?: Json
+          created_at?: string
+          id?: string
+          is_public?: boolean
+          slug?: string | null
+          template_id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
