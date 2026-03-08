@@ -42,12 +42,62 @@ export interface Skill {
   category: 'technical' | 'soft' | 'language';
 }
 
+export interface SectionStyle {
+  fontFamily: string;
+  fontSize: number;
+  fontWeight: string;
+  color: string;
+  lineHeight: number;
+  letterSpacing: number;
+}
+
+export interface ResumeStyles {
+  name: SectionStyle;
+  headings: SectionStyle;
+  body: SectionStyle;
+  contact: SectionStyle;
+  accentColor: string;
+  backgroundColor: string;
+  headerBgColor: string;
+  sectionSpacing: number;
+  pageMargin: number;
+  sectionVisibility: {
+    summary: boolean;
+    experience: boolean;
+    education: boolean;
+    skills: boolean;
+  };
+}
+
+export const defaultSectionStyle: SectionStyle = {
+  fontFamily: 'Plus Jakarta Sans',
+  fontSize: 11,
+  fontWeight: '400',
+  color: '#444444',
+  lineHeight: 1.5,
+  letterSpacing: 0,
+};
+
+export const defaultStyles: ResumeStyles = {
+  name: { fontFamily: 'Plus Jakarta Sans', fontSize: 24, fontWeight: '700', color: '#1a1a1a', lineHeight: 1.2, letterSpacing: 0 },
+  headings: { fontFamily: 'Plus Jakarta Sans', fontSize: 11, fontWeight: '700', color: '#3B82F6', lineHeight: 1.4, letterSpacing: 2 },
+  body: { fontFamily: 'Plus Jakarta Sans', fontSize: 11, fontWeight: '400', color: '#444444', lineHeight: 1.5, letterSpacing: 0 },
+  contact: { fontFamily: 'Plus Jakarta Sans', fontSize: 10, fontWeight: '400', color: '#666666', lineHeight: 1.4, letterSpacing: 0 },
+  accentColor: '#3B82F6',
+  backgroundColor: '#ffffff',
+  headerBgColor: '#ffffff',
+  sectionSpacing: 20,
+  pageMargin: 32,
+  sectionVisibility: { summary: true, experience: true, education: true, skills: true },
+};
+
 export interface ResumeData {
   personalInfo: PersonalInfo;
   summary: string;
   experience: Experience[];
   education: Education[];
   skills: Skill[];
+  styles: ResumeStyles;
 }
 
 export type TemplateId = 'minimal' | 'executive' | 'bold' | 'developer';
