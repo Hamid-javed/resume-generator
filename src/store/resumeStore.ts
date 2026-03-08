@@ -149,6 +149,7 @@ const defaultData: ResumeData = {
   experience: [],
   education: [],
   skills: [],
+  styles: defaultStyles,
 };
 
 export const useResumeStore = create<ResumeState>((set, get) => ({
