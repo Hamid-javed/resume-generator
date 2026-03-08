@@ -42,12 +42,62 @@ export interface Skill {
   category: 'technical' | 'soft' | 'language';
 }
 
+export interface SectionStyle {
+  fontFamily: string;
+  fontSize: number;
+  fontWeight: string;
+  color: string;
+  lineHeight: number;
+  letterSpacing: number;
+}
+
+export interface ResumeStyles {
+  name: SectionStyle;
+  headings: SectionStyle;
+  body: SectionStyle;
+  contact: SectionStyle;
+  accentColor: string;
+  backgroundColor: string;
+  headerBgColor: string;
+  sectionSpacing: number;
+  pageMargin: number;
+  sectionVisibility: {
+    summary: boolean;
+    experience: boolean;
+    education: boolean;
+    skills: boolean;
+  };
+}
+
+export const defaultSectionStyle: SectionStyle = {
+  fontFamily: 'Plus Jakarta Sans',
+  fontSize: 11,
+  fontWeight: '400',
+  color: '#444444',
+  lineHeight: 1.5,
+  letterSpacing: 0,
+};
+
+export const defaultStyles: ResumeStyles = {
+  name: { fontFamily: 'Plus Jakarta Sans', fontSize: 24, fontWeight: '700', color: '#1a1a1a', lineHeight: 1.2, letterSpacing: 0 },
+  headings: { fontFamily: 'Plus Jakarta Sans', fontSize: 11, fontWeight: '700', color: '#3B82F6', lineHeight: 1.4, letterSpacing: 2 },
+  body: { fontFamily: 'Plus Jakarta Sans', fontSize: 11, fontWeight: '400', color: '#444444', lineHeight: 1.5, letterSpacing: 0 },
+  contact: { fontFamily: 'Plus Jakarta Sans', fontSize: 10, fontWeight: '400', color: '#666666', lineHeight: 1.4, letterSpacing: 0 },
+  accentColor: '#3B82F6',
+  backgroundColor: '#ffffff',
+  headerBgColor: '#ffffff',
+  sectionSpacing: 20,
+  pageMargin: 32,
+  sectionVisibility: { summary: true, experience: true, education: true, skills: true },
+};
+
 export interface ResumeData {
   personalInfo: PersonalInfo;
   summary: string;
   experience: Experience[];
   education: Education[];
   skills: Skill[];
+  styles: ResumeStyles;
 }
 
 export type TemplateId = 'minimal' | 'executive' | 'bold' | 'developer';
@@ -77,6 +127,9 @@ interface ResumeState {
   reorderEducation: (oldIndex: number, newIndex: number) => void;
   reorderSkills: (oldIndex: number, newIndex: number) => void;
   reorderBullets: (expId: string, oldIndex: number, newIndex: number) => void;
+  updateStyles: (styles: Partial<ResumeStyles>) => void;
+  updateSectionStyle: (section: keyof Pick<ResumeStyles, 'name' | 'headings' | 'body' | 'contact'>, style: Partial<SectionStyle>) => void;
+  updateSectionVisibility: (section: keyof ResumeStyles['sectionVisibility'], visible: boolean) => void;
   setTemplateId: (id: TemplateId) => void;
   setActiveSection: (section: string) => void;
   setResumeTitle: (title: string) => void;
@@ -96,6 +149,7 @@ const defaultData: ResumeData = {
   experience: [],
   education: [],
   skills: [],
+  styles: defaultStyles,
 };
 
 export const useResumeStore = create<ResumeState>((set, get) => ({
@@ -131,6 +185,7 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
         experience: content.experience || [],
         education: content.education || [],
         skills: content.skills || [],
+        styles: content.styles ? { ...defaultStyles, ...content.styles } : defaultStyles,
       },
     });
   },
@@ -197,6 +252,13 @@ export const useResumeStore = create<ResumeState>((set, get) => ({
     set((s) => ({ data: { ...s.data, skills: arrayMove(s.data.skills, oldIndex, newIndex) } })),
   reorderBullets: (expId, oldIndex, newIndex) =>
     set((s) => ({ data: { ...s.data, experience: s.data.experience.map((e) => e.id === expId ? { ...e, bullets: arrayMove(e.bullets, oldIndex, newIndex) } : e) } })),
+
+  updateStyles: (styles) =>
+    set((s) => ({ data: { ...s.data, styles: { ...s.data.styles, ...styles } } })),
+  updateSectionStyle: (section, style) =>
+    set((s) => ({ data: { ...s.data, styles: { ...s.data.styles, [section]: { ...s.data.styles[section], ...style } } } })),
+  updateSectionVisibility: (section, visible) =>
+    set((s) => ({ data: { ...s.data, styles: { ...s.data.styles, sectionVisibility: { ...s.data.styles.sectionVisibility, [section]: visible } } } })),
 
   setTemplateId: (templateId) => set({ templateId }),
   setActiveSection: (activeSection) => set({ activeSection }),
